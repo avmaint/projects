@@ -28,11 +28,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
 
 ```{r getdata }
-cat(getwd())
-#file.name <- "../../data/Project_Costs 2018-03-22.xlsx"
-
 file.name <- "~/Documents/UACTech/SystemDocumentation/data/Project_Costs 2018-03-22.xlsx"
-
 
 ProjectDetails <- read_excel(file.name, sheet = "Project Details")
 ProjectList.all <- read_excel(file.name, sheet = "ProjectList") 
@@ -44,7 +40,6 @@ BaseData <- merge(ProjectList, ProjectDetails, by="PrjNum") %>%
                     filter(Year >2016) %>%
                     filter(Active == "Y") %>%  
                     rename(Group=Group.x, Project=Project.x) 
-
 ```
 
 # Introduction
