@@ -27,9 +27,12 @@ require(kableExtra)
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 ```
 
-```{r getdata, echo=FALSE}
+```{r getdata }
 cat(getwd())
-file.name <- "../../data/Project_Costs 2018-03-22.xlsx"
+#file.name <- "../../data/Project_Costs 2018-03-22.xlsx"
+
+file.name <- "~/Documents/UACTech/SystemDocumentation/data/Project_Costs 2018-03-22.xlsx"
+
 
 ProjectDetails <- read_excel(file.name, sheet = "Project Details")
 ProjectList.all <- read_excel(file.name, sheet = "ProjectList") 
@@ -74,7 +77,7 @@ data %>%
 
 # Audio Projects
 
-```{r, echo=FALSE}
+```{r }
 this.project.summary <- BaseData %>%
                     filter(Group=="Audio") %>%
                     group_by(Project, Year) %>%
@@ -96,7 +99,7 @@ data %>%
 
 # Lighting Projects
 
-```{r, echo=FALSE}
+```{r }
 this.project.summary <- BaseData %>%
                       filter(Group=="Lighting") %>%
                     group_by(Project, Year) %>%
@@ -118,7 +121,7 @@ data %>%
 
 # Video Projects
 
-```{r, echo=FALSE}
+```{r }
 this.project.summary <- BaseData %>%
                     filter(Group=="Video") %>%
                     group_by(Project, Year) %>%
@@ -169,7 +172,7 @@ Finally, I don’t know what the expectation is of the video system for UMAC and
 
 It may be appropriate for the UMAC technical team to contact me and discuss their requirements.
 
-```{r retrofit, echo=FALSE }
+```{r retrofit }
 p <- 76
 
   thisPrj <- ProjectList.all %>%
@@ -182,7 +185,7 @@ p <- 76
   
 ```
 
-```{r l182, echo=FALSE}
+```{r l182 }
   dets <- ProjectDetails %>% 
       filter(PrjNum == p) %>% 
       mutate(Total= floor(WithTax)) %>%
@@ -207,7 +210,7 @@ The facilities committee requested some alternatives to compare against the Chri
 
 All prices are with tax.
 
-```{r, echo=FALSE}
+```{r }
 comp <- tribble(
   ~Estimate, ~Cost,
   "Christie Retrofit", "$45,000",
@@ -224,7 +227,7 @@ The Chroma-Q solution is a premium solution and provides smoother lighting chang
 
 The pricing was divided into three sections (projects). 
 
-```{r sp50, echo=FALSE,  results='asis'}
+```{r sp50, results='asis'}
 p <- c( 50, 51 ,52)
  
   ProjectList.all %>% # the ones we are interested in are not active
@@ -235,7 +238,7 @@ p <- c( 50, 51 ,52)
 
 ```
 
-```{r echo=FALSE}
+```{r  }
 
   dets <- ProjectDetails %>% 
       filter(PrjNum %in% p ) %>% 
@@ -258,6 +261,7 @@ a <- c("l", "l","l",  "l", "r","r")
 
 ### Details for the Chalice Solution
 The Chalice is a mono-chrome only instrument (no colours). Each fixture is about 30% cheaper. The Chalice price is based on the same structure as the Chroma-Q with a 30% discount applied to the fixtures.  
+
 [Back to top](#top)
 
 ## Video in the Prayer Room
@@ -269,7 +273,7 @@ A room of that size, according to typcial formaula, should have a 60" display. A
 
 Our video distribution capability is at capacity. The Video DA line item is a Distribution Amplifier which would meet the current need plus one other destination. 
 
-```{r vipr, echo=FALSE,  results='asis'}
+```{r vipr, results='asis'}
 p <- 77
 
   thisPrj <- ProjectList %>%
@@ -303,7 +307,7 @@ This is an estimate for IEM for the band. It is a wired system. For vocals, a wi
 
 *The esitmate below forgot to include a stagebox.* 
 
-```{r iemm, echo=FALSE,  results='asis'}
+```{r iemm,  results='asis'}
 p <- 83
 
   thisPrj <- ProjectList.all %>%
