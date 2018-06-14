@@ -1,0 +1,18 @@
+
+### Project Group: `r y` -  `r g` 
+ 
+```{r  echo=FALSE}
+projects <- ProjectList %>% 
+      filter (FY==y, Group==g) %>% 
+      select(PrjNum) %>% 
+      unlist()
+
+po <- ""
+for (p in projects) {
+
+    po <- paste0(po, knit_child('ProjectReport-3Detail.Rmd', quiet=TRUE), collapse="")
+
+}
+```
+
+`r po`

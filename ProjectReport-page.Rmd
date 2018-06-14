@@ -1,0 +1,14 @@
+
+## Project Detail: `r thisPrj$Project` (#`r p`)
+ 
+```{r  echo=FALSE}
+thisPrj <- ProjectList %>%
+              filter(PrjNum == p) 
+ 
+ProjectDetails %>% 
+  filter(PrjNum == p) %>% 
+  select(Project, Location, Item, Year, Product) %>%
+  kable()
+```
+
+[Back to top](#top)

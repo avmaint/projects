@@ -1,0 +1,226 @@
+---
+title: "Tech Projects"
+author: "Terry Doner"
+date: "`r format(Sys.time(), '%B %d %Y')`"
+output:
+  html_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+require(knitr)
+require(readxl)
+require(knitr) 
+require(dplyr)
+require(tidyr)
+require(xtable)
+require(formattable)
+require(kable)
+require(kableExtra)
+
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+setwd("~/Documents/UACTech/SystemDocumentation")
+```
+
+```{r getdata, echo=FALSE}
+
+file.name <- "./Project_Costs 2018-03-22.xlsx"
+
+ProjectDetails <- read_excel(file.name, sheet = "Project Details")
+ProjectList <- read_excel(file.name, sheet = "ProjectList") %>%
+                    filter(Active == "Y")
+PriceList <- read_excel(file.name, sheet = "PriceList")
+
+BaseData <- merge(ProjectList, ProjectDetails, by="PrjNum") %>%
+                    filter(Year >2016) %>%
+                    filter(Active == "Y") %>%  
+                    rename(Group=Group.x, Project=Project.x) 
+
+```
+
+# Introduction
+Report for every project in the future plan.
+
+# Project Summary
+
+Year over year project plan by Audio, Video, Ligthing group.
+
+```{r plistl, echo=FALSE}
+project.summary <- BaseData %>%  
+                    group_by(Group, Year) %>%
+                    summarise(Total=floor(sum(WithTax))) %>%
+                    spread(Year, Total, fill=0)
+
+data <- project.summary %>% ungroup()
+
+data$Total <- floor(Reduce('+',data[, sapply(data, is.numeric)]))
+
+data <- rbind(data,sapply(data, function(y) ifelse(test = is.numeric(y), Reduce('+',y), "Total")))
+
+#kable(data, align="r", caption="Project Summary")
+
+data %>% 
+  kable(  "html", align=c('l', rep('r',times=7)), caption="Summary" ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+[Back to top](#top)
+
+# Audio Projects
+
+```{r, echo=FALSE}
+this.project.summary <- BaseData %>%
+                    group_by(Project, Year) %>%
+                    summarise(Total=floor(sum(WithTax))) %>%
+                    spread(Year, Total, fill=0)
+
+data <- this.project.summary %>% ungroup()
+
+data$Total <- floor(Reduce('+',data[, sapply(data, is.numeric)]))
+
+data <- rbind(data,sapply(data, function(y) ifelse(test = is.numeric(y), Reduce('+',y), "Total")))
+
+data %>% 
+  kable(  "html", align=c('l', rep('r',times=7)) ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+[Back to top](#top)
+
+# Lighting Projects
+
+```{r, echo=FALSE}
+this.project.summary <- BaseData %>%
+                    group_by(Project, Year) %>%
+                    summarise(Total=floor(sum(WithTax))) %>%
+                    spread(Year, Total, fill=0)
+
+data <- this.project.summary %>% ungroup()
+
+data$Total <- floor(Reduce('+',data[, sapply(data, is.numeric)]))
+
+data <- rbind(data,sapply(data, function(y) ifelse(test = is.numeric(y), Reduce('+',y), "Total")))
+
+data %>% 
+  kable(  "html", align=c('l', rep('r',times=7)) ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+[Back to top](#top)
+
+# Video Projects
+
+```{r, echo=FALSE}
+this.project.summary <- BaseData %>%
+                    group_by(Project, Year) %>%
+                    summarise(Total=floor(sum(WithTax))) %>%
+                    spread(Year, Total, fill=0)
+
+data <- this.project.summary %>% ungroup()
+
+data$Total <- floor(Reduce('+',data[, sapply(data, is.numeric)]))
+
+data <- rbind(data,sapply(data, function(y) ifelse(test = is.numeric(y), Reduce('+',y), "Total")))
+
+data %>% 
+  kable(  "html", align=c('l', rep('r',times=7)) ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+[Back to top](#top)
+
+#Special Projects
+## Youth Retrofit for UMAC
+
+For the most part, the equipment in the youth room is gear we discarded from the sanctuary 17 year ago. There has been some additions since then and, as they were independent actions taken by various youth leaders, I have no record of them.
+
+I pulled up a quick estimate of what I think the proper investment should be. Which is substantial replacement sized for what UMAC might need.  I am assuming that the existing monitors, Sub and main speakers and snake can be reused. Also assuming there is a piano that still works (or UMAC will bring one).
+
+A (not so) nice budget number is $17,000. Of course we can make that smaller, depending on what we want to compromise on. I believe that the number one thing I need to replace is the mix console and that may alleviate most of the problems. If not the next thing to be replaced is the amplifiers. The microhones are really beat up, but aren't contribute to the noise problem. Some of the cabling must be replaced but is of low cost.
+
+Finally, I don’t know what the expectation is of the video system for UMAC and so have not evaluated the fit for purpose of that system relative to their needs.
+
+It may be appropriate for the UMAC technical team to contact me and discuss their requirements.
+
+
+```{r retrofit, echo=FALSE,  results='asis'}
+p <- 76
+
+  thisPrj <- ProjectList %>%
+              filter(PrjNum == p)
+
+  thisPrj %>%
+    select(Project, Objective, PrjNum) %>%
+    formattable(align="l")
+
+  dets <- ProjectDetails %>% 
+      filter(PrjNum == p) %>% 
+      mutate(Total= floor(WithTax)) %>%
+      select( Location, Item, Product, Qty, Total) %>%
+      arrange(desc(Total), Item)
+  
+  total.cost <- dets$Total %>% sum() %>% floor()
+  total.qty  <- NA # dets$Qty %>% sum()
+  total.row <- c(Location="Total", Item=" ", Product="", 
+                 Qty=total.qty, WithTax=total.cost)
+  
+  t <- rbind( dets, total.row) 
+  
+  t %>%
+    formattable(align= c("l","l", "l","l", "r","r"))
+```
+
+
+# Project Details
+
+```{r pdetailsmain, echo=FALSE,  results='asis'}
+o <- ""
+
+years <- ProjectList %>% select(FY) %>% unique() %>% arrange(FY) %>% unlist()
+
+for (y in years) {
+  groups <- ProjectList %>% filter(FY==y) %>% select(Group) %>% unique() %>% unlist()
+  
+  cat("<h2>Projects for:", y, "</h2>")
+  
+  for (g in groups) {
+    projects <- ProjectList %>% filter (FY==y, Group==g) %>% select(PrjNum) %>% unlist()
+    
+    cat("<h3>", y, "-", g, "</h3>")
+
+for (p in projects) {
+
+   thisPrj <- ProjectList %>%
+              filter(PrjNum == p) %>%
+              select(PrjNum, Project, FY, Group, Status)
+   cat("<h4>Project:", thisPrj$Project, "(#", thisPrj$PrjNum, ")</h4>")
+ 
+
+  dets <- ProjectDetails %>% 
+      filter(PrjNum == p) %>% 
+      mutate(Total= floor(WithTax)) %>%
+      select( Location, Item, Product, Qty, Total) 
+  
+  total.cost <- dets$Total %>% sum() %>% floor()
+  total.qty  <- dets$Qty %>% sum()
+  total.row <- c(Location="Total", Item=" ", Product="", 
+                 Qty=total.qty, WithTax=total.cost)
+  
+  t <- rbind( dets, total.row)
+  
+  o <- c(o, knit_child('ProjectReport-page.Rmd', quiet=TRUE))
+  }
+ }
+}
+  
+```
+
+`r o`
+
+[Back to top](#top)
+
+# Price List
+```{r pricelist, eval=FALSE  }
+kable(PriceList)
+```

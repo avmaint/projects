@@ -1,0 +1,338 @@
+---
+title: "Tech Projects"
+author: "Terry Doner"
+date: "`r format(Sys.time(), '%B %d %Y')`"
+output:
+  html_document:
+    toc: yes
+    toc_depth: 4
+  word_document:
+    toc: yes
+  pdf_document:
+    toc: yes
+    toc_depth: 4
+---
+
+```{r setup, include=FALSE}
+require(knitr)
+require(readxl)
+require(knitr) 
+require(dplyr)
+require(tidyr)
+require(xtable)
+require(formattable)
+require(kable)
+require(kableExtra)
+
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+```
+
+```{r getdata, echo=FALSE}
+cat(getwd())
+file.name <- "../../data/Project_Costs 2018-03-22.xlsx"
+
+ProjectDetails <- read_excel(file.name, sheet = "Project Details")
+ProjectList.all <- read_excel(file.name, sheet = "ProjectList") 
+ProjectList     <- ProjectList.all%>%
+                    filter(Active == "Y")
+PriceList <- read_excel(file.name, sheet = "PriceList")
+
+BaseData <- merge(ProjectList, ProjectDetails, by="PrjNum") %>%
+                    filter(Year >2016) %>%
+                    filter(Active == "Y") %>%  
+                    rename(Group=Group.x, Project=Project.x) 
+
+```
+
+# Introduction
+Report for every project in the future plan. The project summary lists the total expenditure by group and year. After that there is a detailed listing of the specific projects within each group by year. And then there is the detailed listing of each project by year.
+
+At the end there is a report of a few special projects.
+
+# Project Summary
+
+Year over year project plan by Audio, Video, Ligthing group.
+
+```{r plistl, echo=FALSE}
+project.summary <- BaseData %>%  
+                    group_by(Group, Year) %>%
+                    summarise(Total=floor(sum(WithTax))) %>%
+                    spread(Year, Total, fill=0)
+
+data <- project.summary %>% ungroup()
+
+data$Total <- floor(Reduce('+',data[, sapply(data, is.numeric)]))
+
+data <- rbind(data,sapply(data, function(y) ifelse(test = is.numeric(y), Reduce('+',y), "Total")))
+
+data %>% 
+  kable(    align=c('l', rep('r',times=7)), caption="Summary" ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+[Back to top](#top)
+
+# Audio Projects
+
+```{r, echo=FALSE}
+this.project.summary <- BaseData %>%
+                    filter(Group=="Audio") %>%
+                    group_by(Project, Year) %>%
+                    summarise(Total=floor(sum(WithTax))) %>%
+                    spread(Year, Total, fill=0)
+
+data <- this.project.summary %>% ungroup()
+
+data$Total <- floor(Reduce('+',data[, sapply(data, is.numeric)]))
+
+data <- rbind(data,sapply(data, function(y) ifelse(test = is.numeric(y), Reduce('+',y), "Total")))
+
+data %>% 
+  kable(   align=c('l', rep('r',times=7)) ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+[Back to top](#top)
+
+# Lighting Projects
+
+```{r, echo=FALSE}
+this.project.summary <- BaseData %>%
+                      filter(Group=="Lighting") %>%
+                    group_by(Project, Year) %>%
+                    summarise(Total=floor(sum(WithTax))) %>%
+                    spread(Year, Total, fill=0)
+
+data <- this.project.summary %>% ungroup()
+
+data$Total <- floor(Reduce('+',data[, sapply(data, is.numeric)]))
+
+data <- rbind(data,sapply(data, function(y) ifelse(test = is.numeric(y), Reduce('+',y), "Total")))
+
+data %>% 
+  kable(   align=c('l', rep('r',times=7)) ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+[Back to top](#top)
+
+# Video Projects
+
+```{r, echo=FALSE}
+this.project.summary <- BaseData %>%
+                    filter(Group=="Video") %>%
+                    group_by(Project, Year) %>%
+                    summarise(Total=floor(sum(WithTax))) %>%
+                    spread(Year, Total, fill=0)
+
+data <- this.project.summary %>% ungroup()
+
+data$Total <- floor(Reduce('+',data[, sapply(data, is.numeric)]))
+
+data <- rbind(data,sapply(data, function(y) ifelse(test = is.numeric(y), Reduce('+',y), "Total")))
+
+data %>% 
+  kable(   align=c('l', rep('r',times=7)) ) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+[Back to top](#top)
+
+# Project Details
+
+```{r pdetailsmain, echo=FALSE,  results='asis'}
+pd <- ""
+
+years <- BaseData %>% select(FY) %>% unique() %>% arrange(FY) %>% unlist()
+
+for (y in years) {
+  
+    pd <- paste0(pd, knit_child('ProjectReport-1Year.Rmd', quiet=TRUE), collapse="")
+}
+```
+
+`r pd`
+
+[Back to top](#top)
+
+
+#Special Projects
+## Youth Retrofit for UMAC
+
+For the most part, the equipment in the youth room is gear we discarded from the sanctuary 17 year ago. There has been some additions since then and, as they were independent actions taken by various youth leaders, I have no record of them.
+
+I pulled up a quick estimate of what I think the proper investment should be. Which is substantial replacement sized for what UMAC might need.  I am assuming that the existing monitors, Sub and main speakers and snake can be reused. Also assuming there is a piano that still works (or UMAC will bring one).
+
+A (not so) nice budget number is $17,000. Of course we can make that smaller, depending on what we want to compromise on. I believe that the number one thing I need to replace is the mix console and that may alleviate most of the problems. If not the next thing to be replaced is the amplifiers. The microhones are really beat up, but aren't contribute to the noise problem. Some of the cabling must be replaced but is of low cost.
+
+Finally, I don’t know what the expectation is of the video system for UMAC and so have not evaluated the fit for purpose of that system relative to their needs.
+
+It may be appropriate for the UMAC technical team to contact me and discuss their requirements.
+
+```{r retrofit, echo=FALSE }
+p <- 76
+
+  thisPrj <- ProjectList.all %>%
+              filter(PrjNum == p)
+
+  thisPrj %>%
+    select(Project, Objective, PrjNum) %>%
+    kable(   align=c('lll') ) %>%
+    kable_styling(bootstrap_options = c("striped", "hover"))
+  
+```
+
+```{r l182, echo=FALSE}
+  dets <- ProjectDetails %>% 
+      filter(PrjNum == p) %>% 
+      mutate(Total= floor(WithTax)) %>%
+      select( Location, Item, Product, Qty, Total) %>%
+      arrange(desc(Total), Item)
+  
+  total.cost <- dets$Total %>% sum() %>% floor()
+  total.row <- c(Location="Total", Item=" ", Product="", 
+                 Qty="", Total=total.cost)
+  
+  rbind( dets, total.row)  %>%
+    kable(  align= c("l","l", "l","l", "r","r") ) %>%
+    kable_styling(bootstrap_options = c("striped", "hover"))
+
+    #    formattable(align= c("l","l", "l","l", "r","r"))
+```
+
+[Back to top](#top)
+
+## Comparative Price for House Lights
+The facilities committee requested some alternatives to compare against the Christie Retrofit quote.  I previsouly did a detailed estimate using the Chroma-Q Inspire line of equipment (Details below). Another alternative would be the Altman Chalice (a mono-chrome only light).
+
+All prices are with tax.
+
+```{r, echo=FALSE}
+comp <- tribble(
+  ~Estimate, ~Cost,
+  "Christie Retrofit", "$45,000",
+  "Chroma-Q Inspire", "$63,000",
+  "Altman Chalice", "$52,000"
+)
+
+comp %>% 
+  kable()
+```
+
+### Details for the Chroma-Q Solution 
+The Chroma-Q solution is a premium solution and provides smoother lighting changes comapred to the Retrofit solution. Both the Chroma-Q and the retrofit has the abiliy to wash the entire room in a colour.   
+
+The pricing was divided into three sections (projects). 
+
+```{r sp50, echo=FALSE,  results='asis'}
+p <- c( 50, 51 ,52)
+ 
+  ProjectList.all %>% # the ones we are interested in are not active
+              filter(PrjNum %in% p ) %>%
+      select(Project, Objective, PrjNum) %>%
+        kable(  align= c("l" ) ) %>%
+    kable_styling(bootstrap_options = c("striped", "hover"))
+
+```
+
+```{r echo=FALSE}
+
+  dets <- ProjectDetails %>% 
+      filter(PrjNum %in% p ) %>% 
+      mutate(Total= floor(WithTax)) %>%
+      select( PrjNum, Item, Product, Qty, Total) %>%
+      arrange(PrjNum, Item, Product)
+  
+  total.cost <- dets$Total %>% sum() %>% floor()
+  total.row <- c(PrjNum="Grand Total",  Item=" ", Product="", 
+                 Qty= "", Total=total.cost)
+  
+a <- c("l", "l","l",  "l", "r","r")
+  
+  rbind( dets, total.row)  %>%
+        kable(  align= a ) %>%
+        kable_styling(bootstrap_options = c("striped", "hover"))
+
+#    formattable(align= c("l", "l","l",  "l", "r","r"))
+```
+
+### Details for the Chalice Solution
+The Chalice is a mono-chrome only instrument (no colours). Each fixture is about 30% cheaper. The Chalice price is based on the same structure as the Chroma-Q with a 30% discount applied to the fixtures.  
+[Back to top](#top)
+
+## Video in the Prayer Room
+There was a request for pricing to put a video system in the prayer room which would be capable of displaying the service video just like in the lobby and also be able to play music. 
+
+If such a solution were to be put in place it would make sense to include bluray player so it could be used to other gatherings which wish to play a disc. Also to be able to plugin a laptop.
+
+A room of that size, according to typcial formaula, should have a 60" display. A 4K display is priced becuase at that size, that is what you typically get. A deal may be found at the time of purchase.
+
+Our video distribution capability is at capacity. The Video DA line item is a Distribution Amplifier which would meet the current need plus one other destination. 
+
+```{r vipr, echo=FALSE,  results='asis'}
+p <- 77
+
+  thisPrj <- ProjectList %>%
+              filter(PrjNum == p)
+
+  thisPrj %>%
+    select(Project, Objective, PrjNum) %>%
+    formattable(align="l")
+
+  dets <- ProjectDetails %>% 
+      filter(PrjNum == p) %>% 
+      mutate(Total= floor(WithTax)) %>%
+      select( Location, Item, Product, Qty, Total) %>%
+      arrange(Location, desc(Total), Item)
+  
+  total.cost <- dets$Total %>% sum() %>% floor()
+  total.row <- c(Location="Total", Item=" ", Product="", 
+                 Qty="", Total=total.cost)
+  
+a <- c("l","l", "l","l", "r","r")
+
+  rbind( dets, total.row)  %>%
+        kable(  align= a ) %>%
+        kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+[Back to top](#top)
+
+## In-Ear Monitors for Musicians
+This is an estimate for IEM for the band. It is a wired system. For vocals, a wireless solution might be preferred. Key question is whether we have two different solutions or a single (wireless) solution for everybody.
+
+*The esitmate below forgot to include a stagebox.* 
+
+```{r iemm, echo=FALSE,  results='asis'}
+p <- 83
+
+  thisPrj <- ProjectList.all %>%
+              filter(PrjNum == p)
+
+  thisPrj %>%
+    select(Project, Objective, PrjNum) %>%
+    kable(align="l")
+
+  dets <- ProjectDetails %>% 
+      filter(PrjNum == p) %>% 
+      mutate(Total= floor(WithTax)) %>%
+      select( Location, Item, Manufacturer, Product, Qty, Total) %>%
+      arrange(Location, desc(Total), Item)
+  
+  total.cost <- dets$Total %>% sum() %>% floor()
+  total.row <- c(Location="Total", Item=" ", Manufacturer="", Product="", 
+                 Qty="", Total=total.cost)
+```
+
+The estimated total project cost (taxes in) is $`r as.integer(ceiling(total.cost/1000)*1000)`.
+
+```{r echo=FALSE}
+a <- c("l","l", "l","l", "r","r")
+
+  rbind( dets, total.row)  %>%
+        kable(  align= a ) %>%
+        kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+
+[Back to top](#top)

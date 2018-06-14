@@ -1,0 +1,35 @@
+```{r echo=FALSE}
+require(kableExtra)
+
+thisPrj <- ProjectList %>%
+              filter(PrjNum == p) %>%
+              select(PrjNum, Project, FY, Group, Status, Objective)
+```
+
+#### Project Detail: `r thisPrj$Project` (#`r p`)
+ 
+`r thisPrj$Objective` 
+ 
+```{r  echo=FALSE}
+# This current logic ignores the startyear concept. In order to solve for that, need to do:
+# Add a filter based on startyear.
+# Change the Year and Group logic to use the basedata rather than project list.
+# should also generate a line of text which states it is a multi-year project and list the other years involved.
+ dets <- ProjectDetails %>% 
+      filter(PrjNum == p) %>% 
+      mutate(Total= floor(WithTax)) %>%
+      arrange(Manufacturer, Product, Qty) %>%
+      filter(Qty > 0) %>%
+      select(  Item, Manufacturer, Product, Qty, Total) 
+  
+  total.cost <- dets$Total %>% sum() %>% floor()
+  #total.qty  <- dets$Qty %>% sum()
+  total.row <- c(Item="Total",   Manufacturer="", Product="", 
+                 Qty="" , WithTax=total.cost)
+  
+  rbind( dets, total.row) %>%
+  kable( align= 'llllrr'  ) %>%
+  kable_styling(bootstrap_options = c("striped" ))
+```
+
+[Back to top](#top)

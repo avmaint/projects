@@ -1,0 +1,23 @@
+
+## Projects for Year: `r y`  
+ 
+```{r echo=FALSE}
+groups <- ProjectList %>% 
+    filter(FY==y) %>% 
+    select(Group) %>% 
+    unique() %>% 
+    unlist()
+```
+
+```{r echo=FALSE}
+go <- ""
+
+ for (g in groups) {
+   
+   go <- paste0(go, knit_child('ProjectReport-2Group.Rmd', quiet=TRUE), collapse="")
+
+    }
+
+```
+
+`r go`
